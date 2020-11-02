@@ -159,12 +159,25 @@ void Breadcrumbs::PreUpdate(const ignition::gazebo::UpdateInfo &_info,
     }
 
     auto poseComp = _ecm.Component<components::Pose>(this->model.Entity());
+    if (!poseComp)
+    {
+      ignerr << "Pose component for " << this->model.Name(_ecm) << " not found"
+             << std::endl;
+      return;
+    }
 
     for (std::size_t i = 0; i < cmds.size(); ++i)
     {
       if (this->maxDeployments < 0 ||
           this->numDeployments < this->maxDeployments)
       {
+        // Sanity check.
+        if (!this->modelRoot.ModelByIndex(0))
+        {
+          ignerr << "modelroot.ModelByIndex(0) is NULL" << std::endl;
+          return;
+        }
+
         sdf::Model modelToSpawn = *this->modelRoot.ModelByIndex(0);
         std::string desiredName =
             modelToSpawn.Name() + "_" + std::to_string(this->numDeployments);
@@ -205,6 +218,12 @@ void Breadcrumbs::PreUpdate(const ignition::gazebo::UpdateInfo &_info,
         modelToSpawn.SetPose(poseComp->Data() * modelToSpawn.Pose());
         ignmsg << "Deploying " << modelToSpawn.Name() << " at "
                << modelToSpawn.Pose() << std::endl;
+        if (!this->creator)
+        {
+          ignerr << "creator is NULL" << std::endl;
+          return;
+        }
+
         Entity entity = this->creator->CreateEntities(&modelToSpawn);
         this->creator->SetParent(entity, this->worldEntity);
 
@@ -220,6 +239,7 @@ void Breadcrumbs::PreUpdate(const ignition::gazebo::UpdateInfo &_info,
         {
           auto worldName =
               _ecm.Component<components::Name>(this->worldEntity)->Data();
+
           msgs::StringMsg req;
           req.set_data(modelToSpawn.Name());
           this->node.Request<msgs::StringMsg, msgs::Boolean>(
@@ -290,15 +310,16 @@ void Breadcrumbs::PreUpdate(const ignition::gazebo::UpdateInfo &_info,
       if (td > this->disablePhysicsTime)
       {
         auto name = _ecm.Component<components::Name>(it->first)->Data();
-        if (!this->MakeStatic(it->first, _ecm))
-        {
-          ignerr << "Failed to make breadcrumb '" << name
-                 << "' static." << std::endl;
-        }
-        else
-        {
-          ignmsg << "Breadcrumb '" << name << "' is now static." << std::endl;
-        }
+        // caguero: Disable it for testing.
+        // if (!this->MakeStatic(it->first, _ecm))
+        // {
+        //   ignerr << "Failed to make breadcrumb '" << name
+        //          << "' static." << std::endl;
+        // }
+        // else
+        // {
+        //   ignmsg << "Breadcrumb '" << name << "' is now static." << std::endl;
+        // }
         this->autoStaticEntities.erase(it++);
       }
       else
