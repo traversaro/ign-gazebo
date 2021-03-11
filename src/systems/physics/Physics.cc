@@ -245,10 +245,7 @@ class ignition::gazebo::systems::PhysicsPrivate
           pose3Eql { [](const math::Pose3d &_a, const math::Pose3d &_b)
                      {
                        return _a.Pos().Equal(_b.Pos(), 1e-6) &&
-                         math::equal(_a.Rot().X(), _b.Rot().X(), 1e-6) &&
-                         math::equal(_a.Rot().Y(), _b.Rot().Y(), 1e-6) &&
-                         math::equal(_a.Rot().Z(), _b.Rot().Z(), 1e-6) &&
-                         math::equal(_a.Rot().W(), _b.Rot().W(), 1e-6);
+                         _a.Rot().Equal(_b.Rot(), 1e-6);
                      }};
 
   /// \brief AxisAlignedBox equality comparison function.
