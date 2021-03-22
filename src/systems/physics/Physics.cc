@@ -176,10 +176,10 @@ class ignition::gazebo::systems::PhysicsPrivate
   public: void RemovePhysicsEntities(const EntityComponentManager &_ecm);
 
   /// \brief Update physics from components
-  /// \param[in] _ecm Constant reference to ECM.
+  /// \param[in] _ecm Mutable reference to ECM.
   public: void UpdatePhysics(EntityComponentManager &_ecm);
 
-  /// \brief Step the simulationrfor each world
+  /// \brief Step the simulation for each world
   /// \param[in] _dt Duration
   /// \returns Output data from the physics engine (this currently contains
   /// data for links that experienced a pose change in the physics step)
@@ -2102,6 +2102,8 @@ void PhysicsPrivate::UpdateSim(EntityComponentManager &_ecm,
           {
             _jointPos->Data()[i] = jointPhys->GetPosition(i);
           }
+          _ecm.SetChanged(_entity, components::JointPosition::typeId,
+              ComponentState::PeriodicChange);
         }
         return true;
       });
