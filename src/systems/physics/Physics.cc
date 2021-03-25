@@ -203,7 +203,8 @@ class ignition::gazebo::systems::PhysicsPrivate
   /// most recent physics step. The key is the entity of the link, and the
   /// value is the updated frame data corresponding to that entity.
   public: void UpdateSim(EntityComponentManager &_ecm,
-              std::unordered_map<Entity, physics::FrameData3d> &_linkFrameData);
+              const std::unordered_map<
+                Entity, physics::FrameData3d> &_linkFrameData);
 
   /// \brief Update collision components from physics simulation
   /// \param[in] _ecm Mutable reference to ECM.
@@ -1803,23 +1804,16 @@ std::unordered_map<Entity, physics::FrameData3d> PhysicsPrivate::ChangedLinks(
 
 //////////////////////////////////////////////////
 void PhysicsPrivate::UpdateSim(EntityComponentManager &_ecm,
-    std::unordered_map<Entity, physics::FrameData3d> &_linkFrameData)
+    const std::unordered_map<Entity, physics::FrameData3d> &_linkFrameData)
 {
   IGN_PROFILE("PhysicsPrivate::UpdateSim");
 
   IGN_PROFILE_BEGIN("Models");
 
-  _ecm.Each<components::Model, components::Pose, components::ParentEntity,
-            components::Static, components::ModelCanonicalLink>(
-      [&](const Entity &_entity, components::Model *, components::Pose *_pose,
-          components::ParentEntity *_parentEntity, components::Static *_static,
+  _ecm.Each<components::Model, components::ModelCanonicalLink>(
+      [&](const Entity &_entity, components::Model *,
           components::ModelCanonicalLink *_canonicalLink) -> bool
       {
-        if (_static->Data())
-        {
-          return true;
-        }
-
         // If the model's canonical link did not move, we don't need to update
         // the model's pose
         auto linkFrameIt = _linkFrameData.find(_canonicalLink->Data());
@@ -1833,7 +1827,8 @@ void PhysicsPrivate::UpdateSim(EntityComponentManager &_ecm,
         // this->modelWorldPoses. If not found, this must not be nested, so
         // this model's pose component would reflect it's absolute pose.
         auto parentModelPoseIt =
-          this->modelWorldPoses.find(_parentEntity->Data());
+          this->modelWorldPoses.find(
+              _ecm.Component<components::ParentEntity>(_entity)->Data());
         if (parentModelPoseIt != this->modelWorldPoses.end())
         {
           parentWorldPose = parentModelPoseIt->second;
@@ -1869,16 +1864,17 @@ void PhysicsPrivate::UpdateSim(EntityComponentManager &_ecm,
         this->modelWorldPoses[_entity] = modelWorldPose;
 
         // update model's pose
+        auto modelPose = _ecm.Component<components::Pose>(_entity);
         if (parentWorldPose)
         {
-          *_pose =
+          *modelPose =
               components::Pose(parentWorldPose->Inverse() * modelWorldPose);
         }
         else
         {
           // This is a non-nested model and parentWorldPose would be identity
           // because it would be the pose of the parent (world) w.r.t the world.
-          *_pose = components::Pose(modelWorldPose);
+          *modelPose = components::Pose(modelWorldPose);
         }
 
         _ecm.SetChanged(_entity, components::Pose::typeId,
