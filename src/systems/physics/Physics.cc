@@ -1454,7 +1454,7 @@ void PhysicsPrivate::UpdatePhysics(EntityComponentManager &_ecm)
 
         // Get canonical link offset
         const auto linkEntity =
-            this->entityLinkMap.Get(freeGroup->CanonicalLink());
+            this->entityLinkMap.Get(freeGroup->RootLink());
         if (linkEntity == kNullEntity)
           return true;
 
