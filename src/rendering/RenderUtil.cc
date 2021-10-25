@@ -150,7 +150,7 @@ class ignition::gazebo::RenderUtilPrivate
   public: std::chrono::steady_clock::duration simTime{0};
 
   /// \brief Name of rendering engine
-  public: std::string engineName = "ogre2";
+  public: std::string engineName = "ogre";
 
   /// \brief Name of scene
   public: std::string sceneName = "scene";
@@ -2416,8 +2416,8 @@ void RenderUtil::Init()
   if (!this->dataPtr->engine)
   {
     ignerr << "Engine [" << this->dataPtr->engineName << "] is not supported. "
-           << "Loading OGRE2 instead." << std::endl;
-    this->dataPtr->engine = rendering::engine("ogre2", params);
+           << "Loading OGRE instead." << std::endl;
+    this->dataPtr->engine = rendering::engine("ogre", params);
   }
 
   // Scene

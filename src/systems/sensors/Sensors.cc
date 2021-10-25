@@ -387,7 +387,7 @@ void Sensors::Configure(const Entity &/*_id*/,
   igndbg << "Configuring Sensors system" << std::endl;
   // Setup rendering
   std::string engineName =
-      _sdf->Get<std::string>("render_engine", "ogre2").first;
+      _sdf->Get<std::string>("render_engine", "ogre").first;
 
   this->dataPtr->renderUtil.SetEngineName(engineName);
   this->dataPtr->renderUtil.SetEnableSensors(true,
