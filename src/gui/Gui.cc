@@ -90,7 +90,7 @@ std::string defaultGuiConfigFile(bool _isPlayback,
     }
 
     auto installedConfig = common::joinPaths(
-        IGNITION_GAZEBO_GUI_CONFIG_PATH, defaultGuiConfigName);
+        getGUIConfigPath(), defaultGuiConfigName);
     if (!common::copyFile(installedConfig, defaultConfig))
     {
       ignerr << "Failed to copy installed config [" << installedConfig
@@ -268,7 +268,7 @@ std::unique_ptr<ignition::gui::Application> createGui(
   auto app = std::make_unique<ignition::gui::Application>(
     _argc, _argv, ignition::gui::WindowType::kMainWindow);
 
-  app->AddPluginPath(IGN_GAZEBO_GUI_PLUGIN_INSTALL_DIR);
+  app->AddPluginPath(getGUIPluginInstallDir());
 
   auto aboutDialogHandler = new ignition::gazebo::gui::AboutDialogHandler();
   aboutDialogHandler->setParent(app->Engine());
@@ -280,7 +280,8 @@ std::unique_ptr<ignition::gui::Application> createGui(
   pathManager->setParent(app->Engine());
 
   // add import path so we can load custom modules
-  app->Engine()->addImportPath(IGN_GAZEBO_GUI_PLUGIN_INSTALL_DIR);
+  std::string gui_plugin_install_dir = getGUIPluginInstallDir();
+  app->Engine()->addImportPath(gui_plugin_install_dir.c_str());
 
   app->SetDefaultConfigPath(defaultConfig);
 

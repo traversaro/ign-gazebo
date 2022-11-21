@@ -64,6 +64,7 @@ set (sources
   View.cc
   World.cc
   cmd/ModelCommandAPI.cc
+  config.cc
   ${PROTO_PRIVATE_SRC}
   ${network_sources}
   ${comms_sources}
@@ -152,6 +153,8 @@ target_link_libraries(${ign_lib_target}
 
 # Create the library target
 ign_create_core_library(SOURCES ${sources} CXX_STANDARD 17)
+ign_add_get_install_prefix_impl(GET_INSTALL_PREFIX_FUNCTION ignition::gazebo::getInstallPrefix)
+
 target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
   PUBLIC
   ignition-math${IGN_MATH_VER}

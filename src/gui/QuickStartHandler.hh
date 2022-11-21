@@ -71,7 +71,7 @@ class IGNITION_GAZEBO_GUI_VISIBLE QuickStartHandler : public QObject
   private: std::string worldsPath{IGN_GAZEBO_WORLD_INSTALL_DIR};
 
   /// \brief Get starting world url.
-  private: std::string startingWorld{""};
+  private: std::string startingWorld{getWorldInstallDir()};
 };
 }
 }

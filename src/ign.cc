@@ -69,7 +69,8 @@ extern "C" void cmdVerbosity(
 //////////////////////////////////////////////////
 extern "C" const char *worldInstallDir()
 {
-  return IGN_GAZEBO_WORLD_INSTALL_DIR;
+  static std::string worldInstallDir = ignition::gazebo::getWorldInstallDir();
+  return worldInstallDir.c_str();
 }
 
 //////////////////////////////////////////////////

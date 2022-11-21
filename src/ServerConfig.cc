@@ -982,7 +982,7 @@ gazebo::loadPluginInfo(bool _isPlayback)
   if (!common::exists(defaultConfig))
   {
     auto installedConfig = common::joinPaths(
-        IGNITION_GAZEBO_SERVER_CONFIG_PATH,
+        getServerConfigPath(),
         configFilename);
 
     if (!common::createDirectories(defaultConfigDir))
