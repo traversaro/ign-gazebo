@@ -271,3 +271,10 @@ endif()
 if(TARGET doc)
   file(COPY ${CMAKE_SOURCE_DIR}/tutorials/files/ DESTINATION ${CMAKE_BINARY_DIR}/doxygen/html/files/)
 endif()
+
+if(Protobuf_PROTOC_EXECUTABLE)
+  set_target_properties(protobuf::protoc PROPERTIES
+  IMPORTED_LOCATION_RELEASE "${Protobuf_PROTOC_EXECUTABLE}"
+  )
+endif()
+
