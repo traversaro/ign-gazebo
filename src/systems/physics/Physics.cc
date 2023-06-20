@@ -810,7 +810,7 @@ void Physics::Configure(const Entity &_entity,
   // * Engines installed with gz-physics
   common::SystemPaths systemPaths;
   systemPaths.SetPluginPathEnv(this->dataPtr->pluginPathEnv);
-  systemPaths.AddPluginPaths({GZ_PHYSICS_ENGINE_INSTALL_DIR});
+  systemPaths.AddPluginPaths(gz::physics::getEngineInstallDir());
 
   auto pathToLib = systemPaths.FindSharedLibrary(pluginLib);
   if (pathToLib.empty())
