@@ -10,6 +10,10 @@ get_target_property(msgs_desc_file
   gz-msgs${GZ_MSGS_VER}::gz-msgs${GZ_MSGS_VER} GZ_MSGS_DESC_FILE)
 
 gz_msgs_generate_messages_impl(
+  PYTHON_INTERPRETER
+    ${gz-msgs10_PYTHON_INTERPRETER}
+  PROTOC_EXEC
+    ${gz-msgs10_PROTOC_EXECUTABLE}
   MSGS_GEN_SCRIPT
     ${gz-msgs10_PROTO_GENERATOR_SCRIPT}
   FACTORY_GEN_SCRIPT
