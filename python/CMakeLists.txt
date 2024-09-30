@@ -1,3 +1,18 @@
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+  cmake_minimum_required(VERSION 3.16)
+  set(GZ_SIM_VER 9)
+  set(GZ_COMMON_VER 6)
+  project(gz-sim${GZ_SIM_VER}-python VERSION ${GZ_SIM_VER})
+  find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+  find_package(pybind11 REQUIRED)
+  find_package(gz-sim${PROJECT_VERSION_MAJOR} REQUIRED)
+  set(PROJECT_LIBRARY_TARGET_NAME "gz-sim${PROJECT_VERSION_MAJOR}::gz-sim${PROJECT_VERSION_MAJOR}")
+  include(CTest)
+  if(BUILD_TESTING)
+    enable_testing()
+  endif()
+endif()
+
 if(USE_SYSTEM_PATHS_FOR_PYTHON_INSTALLATION)
   if(NOT Python3_SITEARCH)
     # Get variable from Python3 module
