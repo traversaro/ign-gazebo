@@ -27,10 +27,54 @@
 #include "gz/sim/config.hh"
 #include "gz.hh"
 
-//#if defined(_WIN32) || defined(__APPLE__)
+#ifdef _WIN32
+#include <windows.h>
 #include <process.hpp>
 #include <signal.h>
-//#endif
+#elif defined(__APPLE__)
+#include <mach-o/dyld.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <process.hpp>
+#include <signal.h>
+#endif
+
+std::string getPathToCurrentExecutable() {
+  #ifdef _WIN32
+      char path[MAX_PATH];
+      // GetModuleFileNameA retrieves the full path for the executable.
+      DWORD length = GetModuleFileNameA(NULL, path, MAX_PATH);
+      if (length == 0 || length == MAX_PATH) {
+          // Error handling: either retrieval failed or the path was truncated.
+          return std::string();
+      }
+      return std::string(path, length);
+  #elif defined(__APPLE__)
+      uint32_t size = 0;
+      // First call to determine the size of the buffer needed.
+      _NSGetExecutablePath(NULL, &size);
+      char* buffer = new char[size];
+      if (_NSGetExecutablePath(buffer, &size) != 0) {
+          // Error retrieving the executable path.
+          delete[] buffer;
+          return std::string();
+      }
+      // Resolve any symbolic links to obtain the canonical path.
+      char resolvedPath[PATH_MAX];
+      std::string result;
+      if (realpath(buffer, resolvedPath)) {
+          result = std::string(resolvedPath);
+      } else {
+          // If realpath fails, fallback to the original path.
+          result = std::string(buffer);
+      }
+      delete[] buffer;
+      return result;
+  #else
+      // For unsupported platforms, return an empty string.
+      return std::string();
+  #endif
+    }
 
 
 int g_argc;
@@ -48,9 +92,9 @@ int fullGzSim()
   std::vector<std::string> argvServer;
   std::vector<std::string> argvClient;
 
-  argvServer.push_back("gz-sim-sim");
+  argvServer.push_back(getPathToCurrentExecutable());
   argvServer.push_back("-s");
-  argvClient.push_back("gz-sim-sim");
+  argvClient.push_back(getPathToCurrentExecutable());
   argvClient.push_back("-g");
 
   for (int i = 1; i < g_argc; ++i)
