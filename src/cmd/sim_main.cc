@@ -27,6 +27,107 @@
 #include "gz/sim/config.hh"
 #include "gz.hh"
 
+//#if defined(_WIN32) || defined(__APPLE__)
+#include <process.hpp>
+#include <signal.h>
+//#endif
+
+
+int g_argc;
+char **g_argv;
+std::atomic<bool> g_shouldExit = false;
+void sig_handler(int /*signo*/)
+{
+  g_shouldExit = true;
+}
+
+int fullGzSim()
+{
+  signal(SIGINT, sig_handler);
+
+  std::vector<std::string> argvServer;
+  std::vector<std::string> argvClient;
+
+  argvServer.push_back("gz-sim-sim");
+  argvServer.push_back("-s");
+  argvClient.push_back("gz-sim-sim");
+  argvClient.push_back("-g");
+
+  for (int i = 1; i < g_argc; ++i)
+  {
+    argvServer.push_back(std::string(g_argv[i]));
+    argvClient.push_back(std::string(g_argv[i]));
+  }
+
+  std::cerr << "=======================> Server arguments: ";
+  for(auto &arg : argvServer)
+  {
+    std::cerr << arg << " ";
+  }
+  std::cerr << "\n";
+
+  std::cerr << "=======================> Client arguments: ";
+  for(auto &arg : argvClient )
+  {
+    std::cerr << arg << " ";
+  }
+  std::cerr << "\n";
+
+  // Start server
+  TinyProcessLib::Process server(argvServer);
+
+  // Start client
+  TinyProcessLib::Process client(argvClient);
+
+  // Wait
+  bool serverClosed = false;
+  bool clientClosed = false;
+  int serverExitCode = 0;
+  int clientExitCode = 0;
+
+  while (!g_shouldExit)
+  {
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+
+    // Check if server and gui are still open, if they are closed
+    // close this process as well
+    serverClosed = server.try_get_exit_status(serverExitCode);
+    clientClosed = client.try_get_exit_status(clientExitCode);
+
+    if (serverClosed || clientClosed)
+    {
+      g_shouldExit = true;
+    }
+  }
+
+  // Cleanup
+  serverClosed = server.try_get_exit_status(serverExitCode);
+
+  if (!serverClosed)
+  {
+    server.kill();
+  }
+
+  clientClosed = client.try_get_exit_status(clientExitCode);
+
+  if (!clientClosed)
+  {
+    client.kill();
+  }
+
+  // Get exit status
+  serverExitCode = server.get_exit_status();
+  clientExitCode = client.get_exit_status();
+
+  int exitCode = 0;
+  if (serverExitCode != 0 || clientExitCode != 0)
+  {
+    exitCode = 1;
+  }
+
+  return exitCode;
+}
+
 //////////////////////////////////////////////////
 /// \brief Enumeration of available sim commands
 enum class SimCommand
@@ -160,6 +261,10 @@ void runSimCommand(SimOptions &_opt)
       break;
     case SimCommand::kSimComplete:
       {
+#if defined(_WIN32) || defined(__APPLE__)
+        std::cerr << "=======================> Running fullGzSim() " << std::endl;
+        fullGzSim();
+#else
         if(checkFile(_opt.file) < 0)
           return;
 
@@ -186,7 +291,7 @@ void runSimCommand(SimOptions &_opt)
           // ensure both processes terminate properly, a second SIGINT is sent.
           // A short delay is added to prevent overwhelming the signal handler.
           std::this_thread::sleep_for(std::chrono::milliseconds(100));
-          kill(getpid(), SIGINT);
+          //kill(getpid(), SIGINT);
         });
 
         std::thread guiThread([_opt]{
@@ -200,11 +305,12 @@ void runSimCommand(SimOptions &_opt)
           // ensure both processes terminate properly, a second SIGINT is sent.
           // A short delay is added to prevent overwhelming the signal handler.
           std::this_thread::sleep_for(std::chrono::milliseconds(100));
-          kill(getpid(), SIGINT);
+          //kill(getpid(), SIGINT);
         });
 
         if(guiThread.joinable()) { guiThread.join(); }
         if(serverThread.joinable()) { serverThread.join(); }
+#endif
       }
       break;
     case SimCommand::kNone:
@@ -422,6 +528,8 @@ void addSimFlags(CLI::App &_app)
 //////////////////////////////////////////////////
 int main(int argc, char** argv)
 {
+  g_argc = argc;
+  g_argv = argv;
   CLI::App app{"Run and manage Gazebo simulations."};
 
   app.add_flag_callback("--version",
