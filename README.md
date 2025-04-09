@@ -169,3 +169,4 @@ This library uses [Semantic Versioning](https://semver.org/). Additionally, this
 # License
 
 This library is licensed under [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0). See also the [LICENSE](https://github.com/gazebosim/gz-sim/blob/main/LICENSE) file.
+
