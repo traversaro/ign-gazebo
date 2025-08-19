@@ -17,6 +17,7 @@
 #ifndef GZ_GAZEBO_SYSTEMS_PHYSICS_HH_
 #define GZ_GAZEBO_SYSTEMS_PHYSICS_HH_
 
+#include <algorithm>
 #include <memory>
 #include <unordered_map>
 #include <utility>
