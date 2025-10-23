@@ -1,0 +1,7 @@
+# pixi environments
+.pixi/*
+!.pixi/config.toml
+
+# as this is an example, we do not care too much about reproducibility,
+# so we ignore the pixi.lock
+pixi.lock

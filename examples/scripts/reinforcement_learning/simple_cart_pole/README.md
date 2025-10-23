@@ -3,7 +3,11 @@
 This demo world shows you an example of how you can use SDFormat, Stable Baselines 3 and Gazebo to perform RL with python.
 We start with a very simple cart-pole world. This world is defined in our sdf file `cart_pole.sdf`. It is analogous to the cart-pole world in gymnasium.
 
-## Create a VENV
+To install the software required to run the example, you can either use system packages and a Python venv, or a pixi environment, as documented in one of the following sections.
+
+## System packages and Python venv
+
+### Create a Python venv to work with system packages
 
 First create a virtual environment using python,
 ```
@@ -40,12 +44,11 @@ mismatches.
 export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 ```
 
-
-## Exploring the environment
+### Exploring the environment
 
 You can see the environment by using `gz sim cart_pole.sdf`.
 
-## Perform RL
+##$ Perform RL
 
 To perform RL take a look at `cart_pole_env.py`. We simply subclass `gym.Env` and
 create a new gazebo system. Close any instance of gazebo you may be running.
@@ -53,3 +56,27 @@ To run the script, in your terminal with the venv sourced run:
 ```
 python3 cart_pole_env.py
 ```
+
+## pixi
+
+Install pixi following the documentation at https://pixi.sh/latest/installation/ .
+
+To install the software required of the example, just navigate to the example directory and run `pixi shell`
+
+~~~
+cd gz-sim/examples/scripts/reinforcement_learning/simple_cart_pole
+pixi shell
+~~~
+
+In this shell, you can the traning with:
+
+~~~
+python cart_pole_env.py
+~~~
+
+Or to avoid to explicitly create the `pixi shell` environment, you can just run the `train` pixi task:
+
+~~~
+cd gz-sim/examples/scripts/reinforcement_learning/simple_cart_pole
+pixi run train
+~~~
